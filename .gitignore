@@ -1,0 +1,4 @@
+venv
+.idea
+Project/.env
+Project/google_doc/cred.json
