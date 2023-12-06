@@ -44,8 +44,8 @@ async def set_text(mess: Message, state: FSMContext):
     await state.set_state(CreatReview.Photo)
 
 
-@router.message(CreatReview.Photo, (F.text == "нет" or F.text == "Нет"))
-async def check_up(mess: Message, state: FSMContext):
+@router.message(CreatReview.Photo, F.text.lower() == "нет")
+async def check_up(mess: Message, state: FSMContext, bot: Bot):
     await state.set_state(CreatReview.Check)
     data = await state.get_data()
     await mess.answer(f"<b>Название проекта:</b> {data['name_project']}\n"
@@ -70,7 +70,7 @@ async def check_up(mess: Message, state: FSMContext, bot: Bot):
 
 @router.callback_query(CreatReview.Check, F.data == "yes")
 async def check_yes(call: CallbackQuery, state: FSMContext, bot: Bot):
-    await bot.delete_message(call.from_user.id, call.message.message_id)
+    await bot.delete_message(call.from_user.id, call.message.message_id-1)
     await call.message.delete()
     data = await state.get_data()
     data["username"] = f"@{call.from_user.username}"
@@ -84,7 +84,7 @@ async def check_yes(call: CallbackQuery, state: FSMContext, bot: Bot):
 async def check_no(call: CallbackQuery, state: FSMContext, bot: Bot):
     print("check_no")
     await bot.answer_callback_query(call.id)
-    await call.message.edit_text("Хотите заполнить заново?")
+    await call.message.edit_text("Хотите заполнить заново?", reply_markup=kb.check_up())
     await state.clear()
 
 

@@ -12,6 +12,9 @@ sheet = client.open_by_url('https://docs.google.com/spreadsheets/d/1_NhE6p260SB2
 def get_record(num_record: int, name_list: str) -> list:
     worksheet = sheet.worksheet(name_list)
     data = worksheet.get_all_values()[1:]
+    last_num_record = num_record-1
+    if last_num_record < 0:
+        return []
     return data[num_record-1]
 
 

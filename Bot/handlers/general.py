@@ -1,6 +1,7 @@
 from aiogram import Router, F, Bot
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, CallbackQuery
+from aiogram.exceptions import TelegramBadRequest
 
 from Bot.keyboard import general as kb
 
@@ -15,6 +16,20 @@ async def start(message: Message):
                                caption="Наша компания 10 лет на рынке строительства недвижимости.\n"
                                        " Строительство домов из бруса/камня/комбинированные",
                                reply_markup=kb.start())
+
+
+@router.callback_query(F.data == "start")
+async def start(call: CallbackQuery, bot: Bot):
+    try:
+        await bot.delete_message(call.message.chat.id, call.message.message_id-1)
+    except TelegramBadRequest:
+        pass
+    await call.message.delete()
+    photo = "AgACAgIAAxkDAAM1ZWcc-u7acwQ0YKVZnj-w-CuD4LoAArvPMRsCPTlL1fL_i0-77SIBAAMCAAN5AAMzBA"
+    await call.message.answer_photo(photo,
+                                    caption="Наша компания 10 лет на рынке строительства недвижимости.\n"
+                                            " Строительство домов из бруса/камня/комбинированные",
+                                    reply_markup=kb.start())
 
 
 @router.callback_query(F.data == "contacts")

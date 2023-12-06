@@ -18,6 +18,7 @@ def menu_reviews(num_file: Union[int, str]) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(text="Назад", callback_data=f"rback_{num_file}"),
+            InlineKeyboardButton(text="В меню", callback_data="start"),
             InlineKeyboardButton(text="Далее", callback_data=f"rnext_{num_file}")
         ],
     ]
@@ -30,9 +31,12 @@ def menu_projects(num_records) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(text="Назад", callback_data=f"pback_{num_records}"),
-            InlineKeyboardButton(text="Нравиться", callback_data=f"plike_{num_records}"),
+            InlineKeyboardButton(text="В меню", callback_data=f"start"),
             InlineKeyboardButton(text="Далее", callback_data=f"pnext_{num_records}")
         ],
+        [
+            InlineKeyboardButton(text="Нравиться", callback_data=f"plike_{num_records}"),
+        ]
     ]
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
