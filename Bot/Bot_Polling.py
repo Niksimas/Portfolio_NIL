@@ -15,6 +15,7 @@ bot = Bot(token, parse_mode="HTML")
 dp = Dispatcher(storage=MemoryStorage())
 
 dp.include_router(general.router)
+dp.include_router(add_reviews.router)
 dp.include_router(view_reviews.router)
 dp.include_router(view_projects.router)
 

@@ -5,7 +5,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 def start() -> InlineKeyboardMarkup:
     buttons = [
-        [InlineKeyboardButton(text="Отзывы", callback_data="review")],
+        [InlineKeyboardButton(text="Посмотреть отзывы", callback_data=f"see_review")],
+        [InlineKeyboardButton(text="Оставить отзыв", callback_data=f"add_review")],
         [InlineKeyboardButton(text="Проекты", callback_data="projects")],
         [InlineKeyboardButton(text="Контакты", callback_data="contacts")],
     ]
@@ -43,3 +44,14 @@ def site() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     return keyboard
 
+
+def check_up() -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(text="Да", callback_data="yes"),
+            InlineKeyboardButton(text="Нет", callback_data="no")
+        ],
+    ]
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    return keyboard
