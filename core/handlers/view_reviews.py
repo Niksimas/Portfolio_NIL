@@ -1,10 +1,10 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
 
-from core.handlers.basic import start_call
-from core.database import work_db as database
 from core.keyboard import inline as kb
+from core.handlers.basic import start_call
 from core.keyboard.calldata import Reviews
+from core.database import work_db as database
 
 router = Router()
 
@@ -23,10 +23,12 @@ async def viewing_reviews(call: CallbackQuery):
 
 @router.callback_query(Reviews.filter(F.action == "edit"))
 async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Reviews):
-    project_id = callback_data.review_id + callback_data.value
-    if project_id < 1:
+    list_id = database.get_project_all_id(callback_data.types)
+    num_record = callback_data.id_proj + callback_data.value
+    if num_record < 1:
         await start_call(call)
     else:
+        project_id = list_id[num_record - 1]
         data = database.get_review_data(project_id)
         if data == {}:
             await call.answer("Больше отзывов нет!")

@@ -1,11 +1,12 @@
 from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import CommandStart, StateFilter
 
 from core.keyboard import inline as kb
-from core.administrate.administrete import check_code_admin
 import core.database.work_db as database
+from core.administrate.administrete import check_code_admin
 
 
 router = Router()
@@ -27,7 +28,11 @@ async def start_mess(message: Message, state: FSMContext):
 
 @router.callback_query(F.data == "start")
 async def start_call(call: CallbackQuery):
-    await call.message.edit_text(database.get_mess("start"), reply_markup=kb.start(call.from_user.id))
+    try:
+        await call.message.edit_text(database.get_mess("start"), reply_markup=kb.start(call.from_user.id))
+    except TelegramBadRequest:
+        await call.message.delete()
+        await call.message.answer(database.get_mess("start"), reply_markup=kb.start(call.from_user.id))
 
 
 @router.callback_query(F.data == "contacts")
