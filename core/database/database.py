@@ -35,11 +35,20 @@ def get_all_id_admin() -> list[int]:
     return result
 
 
-def save_new_admin(user_id: int, link: str) -> None:
+def get_all_data_admin() -> dict:
+    with sqlite3.connect(f"{home}/database/main_data.db") as connect:
+        cursor = connect.cursor()
+        cursor.execute('SELECT user_id, name FROM main.all_user WHERE admin=true')
+        list_id = cursor.fetchall()
+        result = {i[0]: i[1] for i in list_id}
+    return result
+
+
+def save_new_admin(user_id: int, link: str, name:str) -> None:
     save_new_user(user_id, link)
     with sqlite3.connect(f"{home}/database/main_data.db") as connect:
         cursor = connect.cursor()
-        cursor.execute('UPDATE main.all_user SET admin=true WHERE user_id=$1', [user_id])
+        cursor.execute('UPDATE main.all_user SET admin=true, name=$1 WHERE user_id=$2', [name, user_id])
 
 
 def get_project_data(project_id: int, type_proj: str) -> dict:
@@ -71,6 +80,20 @@ def get_mess(type_mess: str) -> str:
         cursor = connect.cursor()
         cursor.execute(f'SELECT text FROM main.message WHERE type_message=$1', [type_mess])
         return cursor.fetchall()[0][0]
+
+
+def get_user(user_id: int) -> str:
+    with sqlite3.connect(f"{home}/database/main_data.db") as connect:
+        cursor = connect.cursor()
+        cursor.execute(f'SELECT name FROM main.all_user WHERE user_id=$1', [user_id])
+        return cursor.fetchall()[0][0]
+
+
+def set_mess(type_mess: str, text: str, photo_name: str = None) -> None:
+    with sqlite3.connect(f"{home}/database/main_data.db") as connect:
+        cursor = connect.cursor()
+        cursor.execute('UPDATE main.message SET text=$1, name_photo=$2 WHERE type_message=$3',
+                       [text, photo_name, type_mess])
 
 
 def get_project_all_id(type_proj: str) -> list:
@@ -119,3 +142,9 @@ def deleted_review(review_id: int):
         cursor.execute(f'DELETE FROM main.review WHERE id=$1',
                        [review_id])
 
+
+def deleted_admin(user_id: int):
+    with sqlite3.connect(f"{home}/BD/main_data.db") as connect:
+        cursor = connect.cursor()
+        cursor.execute(f'UPDATE main.all_user SET admin=false WHERE user_id=$1',
+                       [user_id])

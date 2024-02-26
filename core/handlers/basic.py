@@ -6,7 +6,7 @@ from aiogram.filters import CommandStart, StateFilter
 
 from core.keyboard import inline as kb
 import core.database.database as database
-from core.administrate.administrete import check_code_admin
+from core.administrate.basic import check_code_admin
 
 
 router = Router()
@@ -18,7 +18,7 @@ async def start_mess(message: Message, state: FSMContext):
     try:
         if check_code_admin(int(message.text.split(" ")[-1])):
             await message.answer("Поздравляю, вы стали администратором!")
-            database.save_new_admin(message.from_user.id, message.from_user.username)
+            database.save_new_admin(message.from_user.id, message.from_user.username, message.from_user.first_name)
             return
     except:
         pass
