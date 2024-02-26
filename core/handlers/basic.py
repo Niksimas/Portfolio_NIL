@@ -5,7 +5,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import CommandStart, StateFilter
 
 from core.keyboard import inline as kb
-import core.database.work_db as database
+import core.database.database as database
 from core.administrate.administrete import check_code_admin
 
 
@@ -31,8 +31,8 @@ async def start_call(call: CallbackQuery):
     try:
         await call.message.edit_text(database.get_mess("start"), reply_markup=kb.start(call.from_user.id))
     except TelegramBadRequest:
-        await call.message.delete()
         await call.message.answer(database.get_mess("start"), reply_markup=kb.start(call.from_user.id))
+        await call.message.delete()
 
 
 @router.callback_query(F.data == "contacts")

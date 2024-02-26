@@ -1,5 +1,9 @@
 venv
 .idea
-Bot/tmp/
-Bot/.env
-Bot/google_doc/cred.json
+core/tmp/
+.env
+core/cred.json
+core/database/main_data.db
+core/administrate/code.txt
+core/photo/
+core/statistics/data

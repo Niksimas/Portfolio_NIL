@@ -6,7 +6,7 @@ from core.handlers.basic import start_call
 from core.settings import settings, home
 from core.keyboard import inline as kb
 from core.keyboard.calldata import Project
-from core.database import work_db as database
+from core.database import database as database
 
 router = Router()
 
@@ -34,27 +34,27 @@ async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Project):
     if num_record < 1:
         await start_call(call)
     else:
-        project_id = list_id[num_record-1]
-        data = database.get_project_data(project_id, callback_data.types)
-        if data == {}:
-            await call.answer("Больше кейсов нет!")
-        else:
+        try:
+            project_id = list_id[num_record-1]
+            data = database.get_project_data(project_id, callback_data.types)
             message = f"Название: {data['name_project']}\nОписание: {data['description']}"
             if data["name_photo"] == "none":
                 try:
                     await call.message.edit_text(message, reply_markup=kb.menu_projects(num_record, callback_data.types))
                 except TelegramBadRequest:
-                    await call.message.delete()
                     await call.message.answer(message, reply_markup=kb.menu_projects(num_record, callback_data.types))
+                    await call.message.delete()
             else:
                 photo = FSInputFile(f"{home}/photo/{data['name_photo']}.jpg")
                 try:
                     await call.message.edit_media(InputMediaPhoto(media=photo, caption=message),
                                                   reply_markup=kb.menu_projects(num_record, callback_data.types))
                 except TelegramBadRequest:
-                    await call.message.delete()
                     await call.message.answer_photo(photo, caption=message,
                                                     reply_markup=kb.menu_projects(num_record, callback_data.types))
+                    await call.message.delete()
+        except IndexError:
+            await call.answer("Кейсов больше нет!")
 
 
 @router.callback_query(Project.filter(F.action == "like"))
