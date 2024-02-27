@@ -41,4 +41,4 @@ settings = get_settings()
 scope = ['https://www.googleapis.com/auth/spreadsheets']
 credentials = Credentials.from_service_account_file(f'{home}/cred.json')
 client = gspread.authorize(credentials.with_scopes(scope))
-sheet = client.open_by_url('https://docs.google.com/spreadsheets/d/1ZdLjtdhlsD3B1wVDQFRfTo3NpvqGyudoitUJLcBuSNo/edit#gid=0')
+sheet = client.open_by_url('https://docs.google.com/spreadsheets/d/1lnam7Vl7DQBTb-8Dna3wRe_w2IUQrECtgf4kSNo-QCM/edit#gid=0')

@@ -1,6 +1,6 @@
 import sqlite3
-import datetime as dt
 
+from core.statistics.basic import set_statistic
 from core.settings import settings, home
 
 
@@ -11,6 +11,7 @@ def save_new_user(user_id: int, link: str) -> None:
         cursor.execute('SELECT EXISTS(SELECT * FROM all_user where user_id = $1)', [user_id])
         if bool(cursor.fetchall()[0][0]):
             return
+        set_statistic("new_user")
         cursor.execute('INSERT INTO main.all_user (user_id, link) VALUES(?, ?);', data)
 
 

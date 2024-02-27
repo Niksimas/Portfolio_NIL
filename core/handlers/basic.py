@@ -7,7 +7,7 @@ from aiogram.filters import CommandStart, StateFilter
 from core.keyboard import inline as kb
 import core.database.database as database
 from core.administrate.basic import check_code_admin
-
+from core.statistics.basic import set_statistic
 
 router = Router()
 
@@ -39,3 +39,4 @@ async def start_call(call: CallbackQuery):
 async def contacts(call: CallbackQuery, bot: Bot):
     await bot.answer_callback_query(call.id)
     await call.message.edit_text(database.get_mess("contact"), reply_markup=kb.site(database.get_mess("site")))
+    set_statistic("view_contact")

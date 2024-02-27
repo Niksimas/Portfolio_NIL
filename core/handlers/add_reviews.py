@@ -4,7 +4,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 
-
+from core.statistics.basic import set_statistic
 from core.database import database as database
 from core.keyboard import inline as kb
 from core.settings import home, settings
@@ -52,6 +52,7 @@ async def check_yes(call: CallbackQuery, state: FSMContext, bot: Bot):
     await call.message.edit_text("Отзыв отправлен на модерацию! Благодарим, что уделили нам время!",
                                  reply_markup=kb.start(call.from_user.id))
     await state.clear()
+    set_statistic("verify_review")
     mess = (f"Название проекта: <b>{data['name_project']}</b>\nОтзыв:\n {data['text']}\n"
             f"Оставил: [{call.from_user.first_name}](tg://user?id={call.from_user.id})\n\n")
     await bot.send_message(settings.bots.chat_id, "Оставлен отзыв!\n\n" + mess, parse_mode="Markdown",

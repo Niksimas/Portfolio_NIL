@@ -2,11 +2,12 @@ from aiogram import Router, F, Bot
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto
 
-from core.handlers.basic import start_call
-from core.settings import settings, home
 from core.keyboard import inline as kb
+from core.settings import settings, home
 from core.keyboard.calldata import Project
+from core.handlers.basic import start_call
 from core.database import database as database
+from core.statistics.basic import set_statistic
 
 router = Router()
 
@@ -23,6 +24,7 @@ async def viewing_projects(call: CallbackQuery):
             photo = FSInputFile(f"{home}/photo/{data['name_photo']}.jpg")
             await call.message.answer_photo(photo, caption=message,
                                             reply_markup=kb.menu_projects(1, call.data))
+            set_statistic(f"view_project_{call.data}")
     except KeyError:
         await call.answer("Кейсов на данный момент нет!")
 
@@ -53,6 +55,7 @@ async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Project):
                     await call.message.answer_photo(photo, caption=message,
                                                     reply_markup=kb.menu_projects(num_record, callback_data.types))
                     await call.message.delete()
+            set_statistic(f"view_project_{callback_data.types}")
         except IndexError:
             await call.answer("Кейсов больше нет!")
 

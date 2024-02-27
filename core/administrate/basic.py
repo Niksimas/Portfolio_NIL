@@ -1,15 +1,14 @@
-import asyncio
-
 from aiogram import Router, F, Bot
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
-from aiogram.filters.state import State, StatesGroup
-from aiogram.filters import StateFilter
 from aiogram.exceptions import TelegramBadRequest
+from aiogram.filters.state import State, StatesGroup
 
-from core.settings import settings, home
-from core.keyboard import inline as kbi
 from core.database import database
+from core.keyboard import inline as kbi
+from core.settings import settings, home
+from core.statistics.basic import set_statistic
 
 router = Router()
 
@@ -29,9 +28,10 @@ async def menu_admins(call: CallbackQuery):
     review_id = int(call.data.split("-")[-1])
     database.verification_review(review_id)
     await call.message.edit_reply_markup(reply_markup=kbi.verif_yes())
+    set_statistic("verify_review_ok")
 
 
-@router.callback_query(F.data.startswith("save_review"))
+@router.callback_query(F.data.startswith("del_review"))
 async def menu_admins(call: CallbackQuery):
     review_id = int(call.data.split("-")[-1])
     database.deleted_review(review_id)
@@ -89,7 +89,7 @@ async def save_new_start_mess(call: CallbackQuery, state: FSMContext):
     await state.clear()
 
 
-# #############################################################################3 #
+# ################################ Добавление удаление администраторов ############################################ #
 @router.callback_query(F.data == "add_admin")
 async def add_admin(call: CallbackQuery, bot: Bot):
     await call.message.edit_text("Отправьте новому администратору ссылку:\n"
