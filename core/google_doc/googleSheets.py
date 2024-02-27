@@ -1,9 +1,9 @@
 import gspread
 from google.oauth2.service_account import Credentials
-from Bot.function import home
+from core.settings import home
 
 scope = ['https://www.googleapis.com/auth/spreadsheets']
-credentials = Credentials.from_service_account_file(f'{home}/google_doc/cred.json')
+credentials = Credentials.from_service_account_file(f'{home}/cred.json')
 client = gspread.authorize(credentials.with_scopes(scope))
 # Открытие таблицы
 sheet = client.open_by_url('https://docs.google.com/spreadsheets/d/1_NhE6p260SB2P0Zo66sNuAvPsWD2GhGT1uqAM7HNOZc')
