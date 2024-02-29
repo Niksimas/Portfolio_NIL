@@ -1,18 +1,20 @@
 import sqlite3
 
+import datetime as dt
+
 from core.statistics.basic import set_statistic
 from core.settings import settings, home
 
 
 def save_new_user(user_id: int, link: str) -> None:
     with sqlite3.connect(f"{home}/database/main_data.db") as connect:
-        data = [user_id, link]
+        data = [user_id, link, dt.date.strftime(dt.date.today(), '%d.%m.%Y')]
         cursor = connect.cursor()
         cursor.execute('SELECT EXISTS(SELECT * FROM all_user where user_id = $1)', [user_id])
         if bool(cursor.fetchall()[0][0]):
             return
         set_statistic("new_user")
-        cursor.execute('INSERT INTO main.all_user (user_id, link) VALUES(?, ?);', data)
+        cursor.execute('INSERT INTO main.all_user (user_id, link, data_registr) VALUES(?, ?, ?);', data)
 
 
 def get_all_id_user() -> list[int]:
@@ -56,9 +58,9 @@ def get_project_data(project_id: int, type_proj: str) -> dict:
     try:
         with sqlite3.connect(f"{home}/database/main_data.db") as connect:
             cursor = connect.cursor()
-            cursor.execute(f'SELECT * FROM main.{type_proj} WHERE id=$1', [project_id])
+            cursor.execute(f'SELECT * FROM main.project WHERE id=$1 and type=$2', [project_id, type_proj])
             data = cursor.fetchall()[0]
-            result = {"id": data[0], "name_photo": data[1], "name_project": data[2], "description": data[3]}
+            result = {"id": data[0], "type": data[1], "name_project": data[2], "description": data[3], "name_photo": data[4]}
             return result
     except IndexError:
         return {}
@@ -76,11 +78,13 @@ def get_review_data(project_id: int) -> dict:
         return {}
 
 
-def get_mess(type_mess: str) -> str:
+def get_mess(type_mess: str) -> dict:
     with sqlite3.connect(f"{home}/database/main_data.db") as connect:
         cursor = connect.cursor()
-        cursor.execute(f'SELECT text FROM main.message WHERE type_message=$1', [type_mess])
-        return cursor.fetchall()[0][0]
+        cursor.execute(f'SELECT text, photo_id FROM main.message WHERE type_message=$1', [type_mess])
+        data = cursor.fetchall()[0]
+        result = {"text": data[0], "photo_id": data[1]}
+        return result
 
 
 def get_user(user_id: int) -> str:
@@ -93,7 +97,7 @@ def get_user(user_id: int) -> str:
 def set_mess(type_mess: str, text: str, photo_name: str = None) -> None:
     with sqlite3.connect(f"{home}/database/main_data.db") as connect:
         cursor = connect.cursor()
-        cursor.execute('UPDATE main.message SET text=$1, name_photo=$2 WHERE type_message=$3',
+        cursor.execute('UPDATE main.message SET text=$1, photo_id=$2 WHERE type_message=$3',
                        [text, photo_name, type_mess])
 
 
@@ -101,7 +105,7 @@ def get_project_all_id(type_proj: str) -> list:
     try:
         with sqlite3.connect(f"{home}/database/main_data.db") as connect:
             cursor = connect.cursor()
-            cursor.execute(f'SELECT id FROM main.{type_proj}')
+            cursor.execute(f'SELECT id FROM main.project WHERE type=$1', [type_proj])
             data = cursor.fetchall()
             result = [i[0] for i in data]
             return result

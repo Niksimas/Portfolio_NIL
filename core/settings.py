@@ -14,14 +14,12 @@ home = os.path.dirname(__file__)
 class Bots:
     bot_token: str
     admin_id: int
-    chat_id: int
+    chat_nil_id: int
     # admin_id_2: int
 
 @dataclass
 class Settings:
     bots: Bots
-    # db_user: str
-    # db_password: str
 
 
 def get_settings():
@@ -29,11 +27,19 @@ def get_settings():
         bots=Bots(
             bot_token=config("token"),
             admin_id=int(config("admin_id")),
-            chat_id=int(config("chat_id"))
-        ),
-        # db_user=config("DB_USER"),
-        # db_password=config("DB_PASSWORD")
+            chat_nil_id=int(config("chat_nil_id"))
+        )
     )
+
+
+def get_chat_id():
+    with open(f"{home}/chat_id.txt", "r") as f:
+        return int(f.read())
+
+
+def set_chat_id(new_chat_id: int):
+    with open(f"{home}/chat_id.txt", "w") as f:
+        return f.write(str(new_chat_id))
 
 
 settings = get_settings()

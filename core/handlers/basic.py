@@ -22,21 +22,30 @@ async def start_mess(message: Message, state: FSMContext):
             return
     except:
         pass
-    await message.answer(database.get_mess("start"), reply_markup=kb.start(message.from_user.id))
+    data_mess = database.get_mess("start")
+    if data_mess["photo_id"] is None:
+        await message.answer(data_mess["text"], reply_markup=kb.start(message.from_user.id))
+    else:
+        await message.answer_photo(data_mess["photo_id"], caption=data_mess["text"],
+                                   reply_markup=kb.start(message.from_user.id))
     database.save_new_user(message.from_user.id, message.from_user.username)
 
 
 @router.callback_query(F.data == "start")
 async def start_call(call: CallbackQuery):
-    try:
-        await call.message.edit_text(database.get_mess("start"), reply_markup=kb.start(call.from_user.id))
-    except TelegramBadRequest:
-        await call.message.answer(database.get_mess("start"), reply_markup=kb.start(call.from_user.id))
-        await call.message.delete()
+    data_mess = database.get_mess("start")
+    if data_mess["photo_id"] is None:
+        await call.message.answer(data_mess["text"], reply_markup=kb.start(call.from_user.id))
+    else:
+        await call.message.answer_photo(data_mess["photo_id"], caption=data_mess["text"],
+                                        reply_markup=kb.start(call.from_user.id))
+    await call.message.delete()
 
 
 @router.callback_query(F.data == "contacts")
 async def contacts(call: CallbackQuery, bot: Bot):
     await bot.answer_callback_query(call.id)
-    await call.message.edit_text(database.get_mess("contact"), reply_markup=kb.site(database.get_mess("site")))
+    data_mess = database.get_mess("contact")
+    site_mess = database.get_mess("site")["text"]
+    await call.message.edit_text(data_mess["text"], reply_markup=kb.site(site_mess))
     set_statistic("view_contact")

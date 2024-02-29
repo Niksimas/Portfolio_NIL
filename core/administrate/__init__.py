@@ -1,14 +1,14 @@
-import asyncio
 from aiogram import Router, F
 
 from .basic import router as adm
 from .cancel_state import subrouter as cst
 from .notification import subrouter as notif
 from .view_statistics import router as view
+from .blocking_form import subrouter as block
 from core.database.database import get_all_id_admin
 
 router_admin = Router()
-router_admin.include_routers(adm, notif, view)
+router_admin.include_routers(adm, notif, view, block)
 # Должен быть последним
 router_admin.include_router(cst)
 

@@ -8,7 +8,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 from core.administrate import router_admin
 from core.handlers import main_router
-from core.settings import settings
+from core.settings import settings, get_chat_id
 
 home = os.path.dirname(__file__)
 
@@ -21,7 +21,7 @@ if not os.path.exists(f"{home}/core/statistics/data"):
 logging.basicConfig(level=logging.INFO)
 
 token = config("token")
-bot = Bot(token, parse_mode="HTML")
+bot = Bot(token, parse_mode="HTML", disable_web_page_preview=True)
 dp = Dispatcher(storage=MemoryStorage())
 
 dp.include_routers(main_router, router_admin)
@@ -36,13 +36,13 @@ async def stop(message: types.Message):
 
 async def on_startup():
     await bot.delete_webhook()
-    await bot.send_message(settings.bots.admin_id, "Бот <b>запущен</b>")
+    await bot.send_message(get_chat_id(), "Бот запущен")
     await bot.delete_webhook(drop_pending_updates=True)
     return
 
 
 async def on_shutdown():
-    await bot.send_message(settings.bots.admin_id, "Бот выключен")
+    await bot.send_message(get_chat_id(), "Бот выключен")
     await dp.storage.close()
     return
 
