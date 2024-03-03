@@ -174,8 +174,8 @@ def cancel_admin():
 
 def del_admin(admins: dict):
     buttons = []
-    for i in admins:
-        buttons.append([InlineKeyboardButton(text=i["username"], callback_data=f"del_{i['user_id']}")])
+    for i in admins.keys():
+        buttons.append([InlineKeyboardButton(text=admins[i], callback_data=f"del_{i}")])
     buttons.append([InlineKeyboardButton(text="Отмена", callback_data="admin")])
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     return keyboard
