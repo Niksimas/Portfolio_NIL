@@ -35,14 +35,13 @@ async def stop(message: types.Message):
 
 
 async def on_startup():
-    await bot.delete_webhook()
-    await bot.send_message(get_chat_id(), "Бот запущен")
     await bot.delete_webhook(drop_pending_updates=True)
+    await bot.send_message(1235360344, "Бот запущен")
     return
 
-
+# get_chat_id()
 async def on_shutdown():
-    await bot.send_message(get_chat_id(), "Бот выключен")
+    await bot.send_message(1235360344, "Бот выключен")
     await dp.storage.close()
     return
 

@@ -54,5 +54,5 @@ async def contacts(call: CallbackQuery, bot: Bot):
         await call.message.answer_photo(data_mess["photo_id"], caption=data_mess["text"],
                                         reply_markup=kb.site(site_mess["text"], site_mess["photo_id"]))
         await call.message.delete()
-    set_statistic("view_contact")
+    set_statistic("view_contact", call.from_user.id)
 

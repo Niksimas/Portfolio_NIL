@@ -21,7 +21,7 @@ class CreatReview(StatesGroup):
 
 @router.callback_query(CreatReview.Check, F.data == "no")
 @router.callback_query(F.data == "add_review")
-async def viewing_reviews(call: CallbackQuery, state: FSMContext):
+async def set_name_review(call: CallbackQuery, state: FSMContext):
     try:
         msg = await call.message.edit_text("Укажите название проекта", reply_markup=kb.cancel())
     except TelegramBadRequest:
@@ -32,7 +32,7 @@ async def viewing_reviews(call: CallbackQuery, state: FSMContext):
 
 
 @router.message(CreatReview.NameProject)
-async def set_name_project(mess: Message, state: FSMContext, bot: Bot):
+async def set_text_review(mess: Message, state: FSMContext, bot: Bot):
     try:
         del_kb = (await state.get_data())["del"]
         await bot.edit_message_reply_markup(mess.chat.id, del_kb, reply_markup=None)
@@ -45,7 +45,7 @@ async def set_name_project(mess: Message, state: FSMContext, bot: Bot):
 
 
 @router.message(CreatReview.Text)
-async def set_text(mess: Message, state: FSMContext, bot: Bot):
+async def check_review(mess: Message, state: FSMContext, bot: Bot):
     try:
         del_kb = (await state.get_data())["del"]
         await bot.edit_message_reply_markup(mess.chat.id, del_kb, reply_markup=None)
@@ -60,14 +60,14 @@ async def set_text(mess: Message, state: FSMContext, bot: Bot):
 
 
 @router.callback_query(CreatReview.Check, F.data == "yes")
-async def check_yes(call: CallbackQuery, state: FSMContext, bot: Bot):
+async def send_verification(call: CallbackQuery, state: FSMContext, bot: Bot):
     data = await state.get_data()
     data["name"] = f"{call.from_user.first_name}"
     review_id = database.save_new_review(data)
     await call.message.edit_text("Отзыв отправлен на модерацию! Благодарим, что уделили нам время!",
                                  reply_markup=kb.start(call.from_user.id))
     await state.clear()
-    set_statistic("verify_review")
+    set_statistic("verify_review", call.from_user.id)
     mess = (f"Название проекта: <b>{data['name_project']}</b>\nОтзыв:\n {data['text']}\n"
             f"Оставил: [{call.from_user.first_name}](tg://user?id={call.from_user.id})\n\n")
     await bot.send_message(get_chat_id(), "Оставлен отзыв!\n\n" + mess, parse_mode="Markdown",

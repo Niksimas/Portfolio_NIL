@@ -11,7 +11,7 @@ router = Router()
 
 
 @router.callback_query(F.data == "view_statistics")
-async def menu_admins(call: CallbackQuery):
+async def block_statistic(call: CallbackQuery):
     await call.message.edit_text("Тут будет отображаться метрика переходов в вашем боте, "
                                  "чтобы получить доступ к статистике, заполните форму заявки 👇",
                                  reply_markup=kbi.blocking())

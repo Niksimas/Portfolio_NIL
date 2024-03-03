@@ -19,14 +19,14 @@ class FormUnblocking(StatesGroup):
 
 
 @subrouter.message(FormUnblocking.Phone, F.text == "Отмена")
-async def set_message(mess: Message, state: FSMContext):
+async def cancel_form(mess: Message, state: FSMContext):
     await mess.answer("Заполнение формы отменено!", reply_markup=ReplyKeyboardRemove())
     await start_mess(mess, state)
 
 
 @subrouter.callback_query(F.data == "no", FormUnblocking.CheckMessage)
 @subrouter.callback_query(F.data == "fill_form")
-async def start_notification(call: CallbackQuery, state: FSMContext):
+async def set_username(call: CallbackQuery, state: FSMContext):
     msg = await call.message.edit_text("Отправь мне ваше ФИО!",  reply_markup=kbi.cancel())
     await state.update_data({"del": msg.message_id})
     await state.set_state(FormUnblocking.FIO)
@@ -34,7 +34,7 @@ async def start_notification(call: CallbackQuery, state: FSMContext):
 
 
 @subrouter.message(FormUnblocking.FIO)
-async def set_message(mess: Message, state: FSMContext, bot: Bot):
+async def set_phone(mess: Message, state: FSMContext, bot: Bot):
     try:
         msg_del = (await state.get_data())["del"]
         await bot.edit_message_reply_markup(mess.from_user.id, msg_del, reply_markup=None)
@@ -47,7 +47,7 @@ async def set_message(mess: Message, state: FSMContext, bot: Bot):
 
 
 @subrouter.message(FormUnblocking.Phone)
-async def set_photo_yes(mess: Message, state: FSMContext):
+async def set_city(mess: Message, state: FSMContext):
     try:
         await state.update_data({"phone": mess.contact.phone_number})
     except AttributeError:
@@ -61,7 +61,7 @@ async def set_photo_yes(mess: Message, state: FSMContext):
 
 
 @subrouter.message(FormUnblocking.City)
-async def save_photo_front(mess: Message, state: FSMContext, bot: Bot):
+async def check_form(mess: Message, state: FSMContext, bot: Bot):
     await state.update_data({"city": mess.text})
     try:
         msg_del = (await state.get_data())["del"]
@@ -77,7 +77,7 @@ async def save_photo_front(mess: Message, state: FSMContext, bot: Bot):
 
 
 @subrouter.callback_query(FormUnblocking.CheckMessage, F.data == "yes")
-async def start_notification(call: CallbackQuery, state: FSMContext, bot: Bot):
+async def check_form(call: CallbackQuery, state: FSMContext, bot: Bot):
     await call.message.edit_text("Спасибо за информацию, наш менеджер с вами свяжется!",
                                  reply_markup=kbi.finish_form())
     data = await state.get_data()

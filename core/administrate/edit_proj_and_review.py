@@ -17,7 +17,7 @@ subrouter = Router()
 
 # ############################################### Удаление проекта ################################################## #
 @subrouter.callback_query(Project.filter(F.action == "deleted"))
-async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Project):
+async def check_deleted_project(call: CallbackQuery, callback_data: Project):
     data = database.get_project_data(callback_data.id_proj, callback_data.types)
     try:
         await call.message.edit_caption(caption=f"Название: {data['name_project']}\nОписание: {data['description']}\n\n"
@@ -37,7 +37,7 @@ async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Project):
 
 
 @subrouter.callback_query(Project.filter(F.action == "yes_del"))
-async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Project, state: FSMContext):
+async def del_project(call: CallbackQuery, callback_data: Project, state: FSMContext):
     database.deleted_project(callback_data.id_proj)
     if callback_data.num_proj <= 1:
         await call.answer("Последний кейс удален!")
@@ -55,7 +55,7 @@ class EditProject(StatesGroup):
 
 
 @subrouter.callback_query(Project.filter(F.action == "modify"))
-async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Project, state: FSMContext):
+async def modify_project_menu(call: CallbackQuery, callback_data: Project, state: FSMContext):
     data = database.get_project_data(callback_data.id_proj, callback_data.types)
     try:
         await call.message.edit_caption(caption=f"Название: {data['name_project']}\nОписание: {data['description']}\n\n"
@@ -71,7 +71,7 @@ async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Project, 
 
 
 @subrouter.callback_query(F.data == "photo", EditProject.CheckOldMess)
-async def callbacks_num_change_fab(call: CallbackQuery, state: FSMContext):
+async def modify_photo_project(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     await call.message.delete()
     msg = await call.message.answer("Отправьте новую фотографию: ",
@@ -82,7 +82,7 @@ async def callbacks_num_change_fab(call: CallbackQuery, state: FSMContext):
 
 
 @subrouter.message(F.media_group_id, EditProject.SetPhoto)
-async def save_photo_front(mess: Message, state: FSMContext, bot: Bot):
+async def warning_media_group(mess: Message, state: FSMContext, bot: Bot):
     try:
         del_kb = (await state.get_data())["del"]
         await bot.edit_message_reply_markup(mess.chat.id, del_kb, reply_markup=None)
@@ -106,7 +106,7 @@ async def save_photo_front(mess: Message, state: FSMContext, bot: Bot):
 
 
 @subrouter.message(F.photo, EditProject.SetPhoto)
-async def save_photo_front(mess: Message, state: FSMContext, bot: Bot):
+async def save_photo_project(mess: Message, state: FSMContext, bot: Bot):
     try:
         del_kb = (await state.get_data())["del"]
         await bot.edit_message_reply_markup(mess.chat.id, del_kb, reply_markup=None)
@@ -127,14 +127,14 @@ async def save_photo_front(mess: Message, state: FSMContext, bot: Bot):
 
 
 @subrouter.callback_query(Project.filter(F.action == "yes_mod"))
-async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Project, state: FSMContext):
+async def save_modification_project(call: CallbackQuery, callback_data: Project, state: FSMContext):
     data = await state.get_data()
     database.update_project(data)
     await viewing_projects_next_back(call, callback_data, state)
 
 
 @subrouter.callback_query(F.data.in_(["name_project", "description"]), EditProject.CheckOldMess)
-async def callbacks_num_change_fab(call: CallbackQuery, state: FSMContext):
+async def set_new_data_project(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     await call.message.delete()
     msg = await call.message.answer("Отправьте новые данные: ",
@@ -145,7 +145,7 @@ async def callbacks_num_change_fab(call: CallbackQuery, state: FSMContext):
 
 
 @subrouter.message(EditProject.SetText)
-async def save_photo_front(mess: Message, state: FSMContext, bot: Bot):
+async def check_new_data_project(mess: Message, state: FSMContext, bot: Bot):
     try:
         del_kb = (await state.get_data())["del"]
         await bot.edit_message_reply_markup(mess.chat.id, del_kb, reply_markup=None)
@@ -168,7 +168,7 @@ async def save_photo_front(mess: Message, state: FSMContext, bot: Bot):
 
 # ############################################### Удаление отзыва ################################################## #
 @subrouter.callback_query(Reviews.filter(F.action == "deleted"))
-async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Reviews):
+async def check_del_review(call: CallbackQuery, callback_data: Reviews):
     list_id = database.get_reviews_all_id()
     data = database.get_review_data(list_id[callback_data.review_num-1])
     await call.message.edit_text(f"Название проекта:<b> {data['name_project']}</b>\n"
@@ -181,7 +181,7 @@ async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Reviews):
 
 
 @subrouter.callback_query(Reviews.filter(F.action == "yes_del"))
-async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Reviews, state: FSMContext):
+async def del_review(call: CallbackQuery, callback_data: Reviews, state: FSMContext):
     list_id = database.get_reviews_all_id()
     database.deleted_review(list_id[callback_data.review_num-1])
     if callback_data.review_num <= 1:
@@ -199,7 +199,7 @@ class EditReview(StatesGroup):
 
 
 @subrouter.callback_query(Reviews.filter(F.action == "modify"))
-async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Reviews, state: FSMContext):
+async def modify_menu_review(call: CallbackQuery, callback_data: Reviews, state: FSMContext):
     list_id = database.get_reviews_all_id()
     data = database.get_review_data(list_id[callback_data.review_num - 1])
     await call.message.edit_text(f"Название проекта:<b> {data['name_project']}</b>\n"
@@ -212,14 +212,14 @@ async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Reviews, 
 
 
 @subrouter.callback_query(Reviews.filter(F.action == "yes_mod"))
-async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Reviews, state: FSMContext):
+async def save_modification_review(call: CallbackQuery, callback_data: Reviews, state: FSMContext):
     data = await state.get_data()
     database.update_review(data)
     await viewing_reviews_next_back(call, callback_data, state)
 
 
 @subrouter.callback_query(F.data.in_(["name_project", "text", "name"]), EditProject.CheckOldMess)
-async def callbacks_num_change_fab(call: CallbackQuery, state: FSMContext):
+async def set_new_data_review(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     msg = await call.message.edit_text("Отправьте новые данные: ",
                                     reply_markup=kbi.cancel_record(Reviews(action="edit", review_num=data["review_num"],
@@ -229,7 +229,7 @@ async def callbacks_num_change_fab(call: CallbackQuery, state: FSMContext):
 
 
 @subrouter.message(EditReview.SetText)
-async def save_photo_front(mess: Message, state: FSMContext, bot: Bot):
+async def check_new_data_review(mess: Message, state: FSMContext, bot: Bot):
     try:
         del_kb = (await state.get_data())["del"]
         await bot.edit_message_reply_markup(mess.chat.id, del_kb, reply_markup=None)

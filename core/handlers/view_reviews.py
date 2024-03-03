@@ -20,7 +20,7 @@ async def viewing_reviews(call: CallbackQuery):
                                      f"Отзыв: {data['text']}\n"
                                      f"Оставил: {data['name']}",
                                      reply_markup=kb.menu_reviews(1, back_btn=False, user_id=call.from_user.id))
-        set_statistic("view_reviews")
+        set_statistic("view_reviews", call.from_user.id)
     except KeyError:
         await call.answer("Отзывов на данный момент нет!")
     except TelegramBadRequest:
@@ -29,7 +29,7 @@ async def viewing_reviews(call: CallbackQuery):
                                      f"Оставил: {data['name']}",
                                      reply_markup=kb.menu_reviews(1, back_btn=False, user_id=call.from_user.id))
         await call.message.delete()
-        set_statistic("view_reviews")
+        set_statistic("view_reviews", call.from_user.id)
 
 
 @router.callback_query(Reviews.filter(F.action == "edit"))
@@ -56,6 +56,6 @@ async def viewing_reviews_next_back(call: CallbackQuery, callback_data: Reviews,
                                          f"Оставил: {data['name']}",
                                          reply_markup=kb.menu_reviews(num_record, user_id=call.from_user.id,
                                                                       back_btn=back_btn, next_btn=next_btn))
-            set_statistic("view_reviews")
+            set_statistic("view_reviews", call.from_user.id)
         except IndexError:
             await call.answer("Отзывов больше нет!")

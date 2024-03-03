@@ -20,7 +20,7 @@ class AddProject(StatesGroup):
 
 @subrouter.callback_query(F.data == "no", AddProject.CheckProject)
 @subrouter.callback_query(F.data == "add_project" or F.data == "add_review")
-async def menu_admins(call: CallbackQuery, state: FSMContext):
+async def menu_add_project(call: CallbackQuery, state: FSMContext):
     try:
         await call.message.edit_text("Выберите тип проекта:", reply_markup=kbi.type_project())
     except TelegramBadRequest:
@@ -30,14 +30,14 @@ async def menu_admins(call: CallbackQuery, state: FSMContext):
 
 
 @subrouter.callback_query(F.data.in_(["add_bot", "add_site", "add_design"]), AddProject.TypeProject)
-async def menu_admins(call: CallbackQuery, state: FSMContext):
+async def set_name_project(call: CallbackQuery, state: FSMContext):
     msg = await call.message.edit_text("Напишите название проекта:", reply_markup=kbi.cancel_admin())
     await state.update_data({"type": call.data.split("_")[-1], "del": msg.message_id})
     await state.set_state(AddProject.SetName)
 
 
 @subrouter.message(AddProject.SetName)
-async def menu_admins(mess: Message, state: FSMContext, bot: Bot):
+async def set_description_project(mess: Message, state: FSMContext, bot: Bot):
     try:
         del_kb = (await state.get_data())["del"]
         await bot.edit_message_reply_markup(mess.chat.id, del_kb, reply_markup=None)
@@ -50,7 +50,7 @@ async def menu_admins(mess: Message, state: FSMContext, bot: Bot):
 
 
 @subrouter.message(AddProject.SetDescription)
-async def menu_admins(mess: Message, state: FSMContext, bot: Bot):
+async def check_new_project(mess: Message, state: FSMContext, bot: Bot):
     try:
         del_kb = (await state.get_data())["del"]
         await bot.edit_message_reply_markup(mess.chat.id, del_kb, reply_markup=None)
@@ -77,7 +77,7 @@ async def menu_admins(mess: Message, state: FSMContext, bot: Bot):
 
 
 @subrouter.callback_query(F.data == "yes", AddProject.CheckProject)
-async def menu_admins(call: CallbackQuery, state: FSMContext):
+async def save_new_project(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     database.save_new_project(data)
     await state.clear()
@@ -95,7 +95,7 @@ class AddReview(StatesGroup):
 
 @subrouter.callback_query(F.data == "add_review_admin")
 @subrouter.callback_query(F.data == "no", AddReview.CheckReview)
-async def menu_admins(call: CallbackQuery, state: FSMContext):
+async def set_name_proj_in_review(call: CallbackQuery, state: FSMContext):
     try:
         msg = await call.message.edit_text("Напишите название проекта: ", reply_markup=kbi.cancel_admin())
     except TelegramBadRequest:
@@ -106,7 +106,7 @@ async def menu_admins(call: CallbackQuery, state: FSMContext):
 
 
 @subrouter.message(AddReview.SetNameProj)
-async def menu_admins(mess: Message, state: FSMContext, bot: Bot):
+async def set_text_review(mess: Message, state: FSMContext, bot: Bot):
     try:
         del_kb = (await state.get_data())["del"]
         await bot.edit_message_reply_markup(mess.chat.id, del_kb, reply_markup=None)
@@ -118,7 +118,7 @@ async def menu_admins(mess: Message, state: FSMContext, bot: Bot):
 
 
 @subrouter.message(AddReview.SetDescription)
-async def menu_admins(mess: Message, state: FSMContext, bot: Bot):
+async def set_username_review(mess: Message, state: FSMContext, bot: Bot):
     try:
         del_kb = (await state.get_data())["del"]
         await bot.edit_message_reply_markup(mess.chat.id, del_kb, reply_markup=None)
@@ -130,7 +130,7 @@ async def menu_admins(mess: Message, state: FSMContext, bot: Bot):
 
 
 @subrouter.message(AddReview.SetNameUser)
-async def menu_admins(mess: Message, state: FSMContext, bot: Bot):
+async def check_new_review(mess: Message, state: FSMContext, bot: Bot):
     try:
         del_kb = (await state.get_data())["del"]
         await bot.edit_message_reply_markup(mess.chat.id, del_kb, reply_markup=None)
@@ -145,7 +145,7 @@ async def menu_admins(mess: Message, state: FSMContext, bot: Bot):
 
 
 @subrouter.message(AddReview.SetNameUser)
-async def menu_admins(call: CallbackQuery, state: FSMContext):
+async def save_new_review(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     id_review = database.save_new_review(data)
     database.verification_review(id_review)

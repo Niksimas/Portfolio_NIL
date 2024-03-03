@@ -32,7 +32,7 @@ async def viewing_projects(call: CallbackQuery):
             await call.message.delete()
             await call.message.answer_photo(data['name_photo'], caption=message,
                                             reply_markup=kb.menu_projects(1, call.data, back_btn=False, user_id=call.from_user.id, id_proj=list_id[0], next_btn=next_btn))
-            set_statistic(f"view_project_{call.data}")
+            set_statistic(f"view_project_{call.data}", call.from_user.id)
     except (KeyError, IndexError):
         await call.answer("Кейсов на данный момент нет!")
 
@@ -76,7 +76,7 @@ async def viewing_projects_next_back(call: CallbackQuery, callback_data: Project
                                                     reply_markup=kb.menu_projects(num_record, callback_data.types, call.from_user.id, list_id[num_record-1],
                                                                                   back_btn, next_btn))
                     await call.message.delete()
-            set_statistic(f"view_project_{callback_data.types}")
+            set_statistic(f"view_project_{callback_data.types}", call.from_user.id)
         except IndexError:
             await call.answer("Кейсов больше нет!")
 
