@@ -135,6 +135,7 @@ def admin_menu(user_id: int) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="📱 Изменить контакты", callback_data="edit_contact_mess")],
         [InlineKeyboardButton(text="🔗 Изменить кнопку перехода на сайт", callback_data="edit_contact_btn")],
         [InlineKeyboardButton(text="📊 Просмотр статистики", callback_data="view_statistics")],
+        [InlineKeyboardButton(text="🔁 Сменить чат администраторов", callback_data="new_chat")],
         [
             InlineKeyboardButton(text="+📂 Добавить проект", callback_data="add_project"),
             InlineKeyboardButton(text="+💬 Добавить отзыв", callback_data="add_review_admin")
