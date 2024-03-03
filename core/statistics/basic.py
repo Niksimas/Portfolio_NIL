@@ -1,13 +1,13 @@
 import os
 import json
-from core.database.database import get_all_id_admin
+from core.settings import get_admin_id
 from core.settings import home
 
 path_stat = f"{home}/statistics/data/main_stat.json"
 
 
 def set_statistic(fild: str, user_id: int):
-    if user_id in get_all_id_admin():
+    if user_id in get_admin_id():
         return
     with open(path_stat, "r+") as f:
         data = json.load(f)

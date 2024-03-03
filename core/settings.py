@@ -31,6 +31,9 @@ def get_settings():
         )
     )
 
+def get_admin_id():
+    from core.database.database import get_all_id_admin
+    return get_all_id_admin()
 
 def get_chat_id():
     with open(f"{home}/chat_id.txt", "r") as f:
