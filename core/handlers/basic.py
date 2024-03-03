@@ -2,7 +2,7 @@ from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.filters import CommandStart, StateFilter
+from aiogram.filters import CommandStart, StateFilter, Command
 
 from core.keyboard import inline as kb
 import core.database.database as database
@@ -32,7 +32,8 @@ async def start_mess(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "start")
-async def start_call(call: CallbackQuery):
+async def start_call(call: CallbackQuery, state: FSMContext):
+    await state.clear()
     data_mess = database.get_mess("start")
     if data_mess["photo_id"] is None:
         await call.message.answer(data_mess["text"], reply_markup=kb.start(call.from_user.id))
@@ -46,6 +47,12 @@ async def start_call(call: CallbackQuery):
 async def contacts(call: CallbackQuery, bot: Bot):
     await bot.answer_callback_query(call.id)
     data_mess = database.get_mess("contact")
-    site_mess = database.get_mess("site")["text"]
-    await call.message.edit_text(data_mess["text"], reply_markup=kb.site(site_mess))
+    site_mess = database.get_mess("site")
+    try:
+        await call.message.edit_text(data_mess["text"], reply_markup=kb.site(site_mess["text"], site_mess["photo_id"]))
+    except TelegramBadRequest:
+        await call.message.answer_photo(data_mess["photo_id"], caption=data_mess["text"],
+                                        reply_markup=kb.site(site_mess["text"], site_mess["photo_id"]))
+        await call.message.delete()
     set_statistic("view_contact")
+

@@ -6,6 +6,14 @@ from core.statistics.basic import set_statistic
 from core.settings import settings, home
 
 
+def get_data_user(user_id) -> dict:
+    with sqlite3.connect(f"{home}/database/main_data.db") as connect:
+        cursor = connect.cursor()
+        cursor.execute(f'SELECT * FROM main.all_user WHERE user_id=$1', [user_id])
+        data = cursor.fetchall()[0]
+        return {"user_id": data[0], "link": data[1], "name": data[3], "date_reg": data[4]}
+
+
 def save_new_user(user_id: int, link: str) -> None:
     with sqlite3.connect(f"{home}/database/main_data.db") as connect:
         data = [user_id, link, dt.date.strftime(dt.date.today(), '%d.%m.%Y')]
@@ -87,7 +95,7 @@ def get_mess(type_mess: str) -> dict:
         return result
 
 
-def get_user(user_id: int) -> str:
+def get_user_name(user_id: int) -> str:
     with sqlite3.connect(f"{home}/database/main_data.db") as connect:
         cursor = connect.cursor()
         cursor.execute(f'SELECT name FROM main.all_user WHERE user_id=$1', [user_id])
@@ -137,19 +145,45 @@ def save_new_review(data: dict) -> int:
 def verification_review(review_id: int) -> None:
     with sqlite3.connect(f"{home}/database/main_data.db") as connect:
         cursor = connect.cursor()
-        cursor.execute('UPDATE main.review SET verification=true '
-                       'WHERE id=$1', [review_id])
+        cursor.execute('UPDATE main.review SET verification=true WHERE id=$1', [review_id])
 
 
 def deleted_review(review_id: int):
-    with sqlite3.connect(f"{home}/BD/main_data.db") as connect:
+    with sqlite3.connect(f"{home}/database/main_data.db") as connect:
         cursor = connect.cursor()
-        cursor.execute(f'DELETE FROM main.review WHERE id=$1',
-                       [review_id])
+        cursor.execute(f'DELETE FROM main.review WHERE id=$1', [review_id])
+
+
+def deleted_project(project_id: int):
+    with sqlite3.connect(f"{home}/database/main_data.db") as connect:
+        cursor = connect.cursor()
+        cursor.execute(f'DELETE FROM main.project WHERE id=$1', [project_id])
 
 
 def deleted_admin(user_id: int):
-    with sqlite3.connect(f"{home}/BD/main_data.db") as connect:
+    with sqlite3.connect(f"{home}/database/main_data.db") as connect:
         cursor = connect.cursor()
         cursor.execute(f'UPDATE main.all_user SET admin=false WHERE user_id=$1',
                        [user_id])
+
+
+def save_new_project(data: dict) -> None:
+    with sqlite3.connect(f"{home}/database/main_data.db") as connect:
+        cursor = connect.cursor()
+        cursor.execute('INSERT INTO main.project (type, name, description, name_photo) VALUES(?, ?, ?, ?);',
+                       [data["type"], data["name"], data["description"], data["name_photo"]])
+
+
+def update_project(data: dict) -> None:
+    with sqlite3.connect(f"{home}/database/main_data.db") as connect:
+        cursor = connect.cursor()
+        cursor.execute('UPDATE main.project SET name=$1, description=$2, name_photo=$3 WHERE id=$4',
+                       [data["name_project"], data['description'], data['name_photo'], data['id_proj']])
+
+
+def update_review(data: dict) -> None:
+    with sqlite3.connect(f"{home}/database/main_data.db") as connect:
+        cursor = connect.cursor()
+        cursor.execute('UPDATE main.review SET name_project=$1, text=$2, name=$3 WHERE id=$4',
+                       [data["name_project"], data['text'], data['name'], data['review_num']])
+

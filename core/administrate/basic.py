@@ -16,6 +16,7 @@ bot = Bot(token=settings.bots.bot_token, parse_mode='HTML')
 
 
 @router.callback_query(F.data == "admin")
+@router.callback_query(F.data == "no")
 async def menu_admins(call: CallbackQuery, state: FSMContext):
     try:
         await call.message.edit_text("Доступные процессы: ", reply_markup=kbi.admin_menu(call.from_user.id))
@@ -165,7 +166,7 @@ async def del_admin(call: CallbackQuery):
 
 @router.callback_query(F.data.split("_")[0] == "del", StateFilter(None))
 async def del_admin(call: CallbackQuery):
-    name = database.get_user(int(call.data.split('_')[-1]))
+    name = database.get_user_name(int(call.data.split('_')[-1]))
     await call.message.edit_text(f"Вы уверены в удалении {name}?",
                                  reply_markup=kbi.confirmation(cd_y=f"Yes_{call.data.split('_')[-1]}"))
 
@@ -176,33 +177,46 @@ async def del_admin(call: CallbackQuery):
     await call.message.edit_text("Администратор удален!", reply_markup=kbi.admin_menu(call.from_user.id))
 
 
-# #####################################################################################################
+# ########################################### Пользователи ##########################################################
 @router.callback_query(F.data == "users", StateFilter(None))
 async def del_admin(call: CallbackQuery):
-    pass
+    data = database.get_all_id_user()
+    mess_out = "Пользователи бота\n"
+    for i in range(1, 6):
+        tpm_data = database.get_data_user(data[-i])
+        tmp = f"{i}. @{tpm_data['link']} - {tpm_data['date_reg']}\n"
+        mess_out += tmp
+    mess_out += (f"\n Общее число пользователей: {len(data)}\n\n"
+                 "Чтобы получить всех пользователей заполните форму заявки")
+    await call.message.edit_text(mess_out, reply_markup=kbi.blocking())
 
 
-# ############################ Изменить стартовое сообщение ############################ #
+# @router.callback_query(F.data == "users", StateFilter(None))
+# async def del_admin(call: CallbackQuery):
+#     тут будет подключение к гуглу
+
+
+# ###################################### Изменить контакты ################################################ #
 class EditContact(StatesGroup):
     CheckOldMess = State()
     SetMessage = State()
 
 
-@router.callback_query(F.data == "edit_start_mess")
+@router.callback_query(F.data == "edit_contact_mess")
 async def check_start_mess(call: CallbackQuery, state: FSMContext):
-    data_mess = database.get_mess('start')
+    data_mess = database.get_mess('contact')
     if data_mess["photo_id"] is None:
         await call.message.edit_text(f"Сейчас сообщение выглядит так:\n\n{data_mess['text']}\n\n"
-                                     "Желаете изменить его?", reply_markup=kbi.confirmation())
+                                     "Желаете изменить его?", parse_mode="html", reply_markup=kbi.confirmation())
     else:
         await call.message.answer_photo(data_mess["photo_id"], caption=data_mess["text"],
                                         reply_markup=kbi.confirmation())
         await call.message.delete()
-    await state.set_state(EditStartMess.CheckOldMess)
+    await state.set_state(EditContact.CheckOldMess)
 
 
-@router.callback_query(F.data == "yes", EditStartMess.CheckOldMess)
-@router.callback_query(F.data == "no", EditStartMess.SetMessage)
+@router.callback_query(F.data == "yes", EditContact.CheckOldMess)
+@router.callback_query(F.data == "no", EditContact.SetMessage)
 async def set_new_start_mess(call: CallbackQuery, state: FSMContext):
     try:
         msg = await call.message.edit_text(f"Отправьте новое сообщение (с фотографией и/или форматированием текста):",
@@ -212,10 +226,10 @@ async def set_new_start_mess(call: CallbackQuery, state: FSMContext):
         msg = await call.message.answer(f"Отправьте новое сообщение (с фотографией и/или форматированием текста):",
                                         reply_markup=kbi.cancel_admin())
     await state.update_data({"del": msg.message_id})
-    await state.set_state(EditStartMess.SetMessage)
+    await state.set_state(EditContact.SetMessage)
 
 
-@router.message(EditStartMess.SetMessage)
+@router.message(EditContact.SetMessage)
 async def check_new_mess(mess: Message, state: FSMContext, bot: Bot):
     try:
         del_kb = (await state.get_data())["del"]
@@ -240,7 +254,7 @@ async def check_new_mess(mess: Message, state: FSMContext, bot: Bot):
         await state.update_data({"text": mess.html_text, "photo_id": msg.photo[-1].file_id, "del": msg1.message_id})
 
 
-@router.callback_query(F.data == "yes", EditStartMess.SetMessage)
+@router.callback_query(F.data == "yes", EditContact.SetMessage)
 async def save_new_start_mess(call: CallbackQuery, state: FSMContext):
     try:
         del_mess = (await state.get_data())["del"]
@@ -250,8 +264,65 @@ async def save_new_start_mess(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
     data = await state.get_data()
     try:
-        database.set_mess("start", data["text"], data["photo_id"])
+        database.set_mess("contact", data["text"], data["photo_id"])
     except KeyError:
-        database.set_mess("start", data["text"])
+        database.set_mess("contact", data["text"])
+    await call.message.answer("Новое сообщение сохранено!", reply_markup=kbi.admin_menu(call.from_user.id))
+    await state.clear()
+
+
+# ###################################### Изменить кнопку контактов ################################################ #
+class EditContactBtn(StatesGroup):
+    CheckOldMess = State()
+    SetMessage = State()
+
+
+@router.callback_query(F.data == "edit_contact_btn")
+async def check_start_mess(call: CallbackQuery, state: FSMContext):
+    data_mess = database.get_mess('site')
+    await call.message.edit_text(f"Сейчас кнопка настроена так:\n\n"
+                                 f"Текст: {data_mess['text']}\n"
+                                 f"Ссылка: {data_mess['photo_id']}\n\n"
+                                 "Желаете изменить его?",
+                                 reply_markup=kbi.confirmation(txt_y="Ссылку", txt_n="Текст", cd_y="link", cd_n="text"))
+    await state.set_state(EditContact.CheckOldMess)
+    await state.update_data({"link": data_mess['photo_id'], "text": data_mess['text']})
+
+
+@router.callback_query(F.data == "no", EditContactBtn.SetMessage)
+@router.callback_query(F.data == "link" or F.data == "text", EditContactBtn.CheckOldMess)
+async def set_new_start_mess(call: CallbackQuery, state: FSMContext):
+    msg = await call.message.edit_text(f"Отправьте новые данные", reply_markup=kbi.cancel_admin())
+    await state.set_state(EditContactBtn.SetMessage)
+    await state.update_data({"del": msg.message_id, "type": call.data})
+
+
+@router.message(EditContactBtn.SetMessage)
+async def check_new_mess(mess: Message, state: FSMContext, bot: Bot):
+    try:
+        del_kb = (await state.get_data())["del"]
+        await bot.edit_message_reply_markup(mess.chat.id, del_kb, reply_markup=None)
+    except (KeyError, TelegramBadRequest):
+        pass
+    data = await state.get_data()
+    data[data['type']] = mess.text
+    await mess.answer(f"Новые данные для кнопки:\n\n"
+                      f"Текст: {data['text']}\n"
+                      f"Ссылка: {data['link']}\n"
+                      f"Сохраняем?",
+                      reply_markup=kbi.confirmation())
+    await state.update_data(data)
+
+
+@router.callback_query(F.data == "yes", EditContactBtn.SetMessage)
+async def save_new_start_mess(call: CallbackQuery, state: FSMContext):
+    try:
+        del_mess = (await state.get_data())["del"]
+        await bot.delete_message(call.from_user.id, del_mess)
+    except (KeyError, TelegramBadRequest):
+        pass
+    await call.message.delete()
+    data = await state.get_data()
+    database.set_mess("contact", data["text"], data["link"])
     await call.message.answer("Новое сообщение сохранено!", reply_markup=kbi.admin_menu(call.from_user.id))
     await state.clear()

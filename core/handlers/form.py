@@ -1,6 +1,6 @@
 from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
-from aiogram.filters.state import State, StatesGroup
+from aiogram.filters.state import State, StatesGroup, StateFilter
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 
 from core.handlers.basic import start_mess
@@ -24,7 +24,7 @@ async def set_message(mess: Message, state: FSMContext):
     await start_mess(mess, state)
 
 
-@subrouter.callback_query(F.data == "form")
+@subrouter.callback_query(F.data == "form", StateFilter(None))
 @subrouter.callback_query(F.data == "no", Form.CheckMessage)
 async def start_notification(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
@@ -34,7 +34,7 @@ async def start_notification(call: CallbackQuery, state: FSMContext):
     return
 
 
-@subrouter.message(Form.Phone)
+@subrouter.message(Form.FIO)
 async def set_message(mess: Message, state: FSMContext, bot: Bot):
     try:
         msg_del = (await state.get_data())["del"]
@@ -58,7 +58,7 @@ async def set_photo_yes(mess: Message, state: FSMContext):
     return
 
 
-@subrouter.message(Form.CheckMessage)
+@subrouter.message(Form.City)
 async def save_photo_front(mess: Message, state: FSMContext, bot: Bot):
     await state.update_data({"city": mess.text})
     try:

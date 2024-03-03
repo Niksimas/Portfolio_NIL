@@ -1,5 +1,7 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
+from aiogram.fsm.context import FSMContext
+from aiogram.exceptions import TelegramBadRequest
 
 from core.keyboard import inline as kb
 from core.keyboard.calldata import Reviews
@@ -17,16 +19,24 @@ async def viewing_reviews(call: CallbackQuery):
         await call.message.edit_text(f"Название проекта:<b> {data['name_project']}</b>\n"
                                      f"Отзыв: {data['text']}\n"
                                      f"Оставил: {data['name']}",
-                                     reply_markup=kb.menu_reviews(1, back_btn=False))
+                                     reply_markup=kb.menu_reviews(1, back_btn=False, user_id=call.from_user.id))
         set_statistic("view_reviews")
     except KeyError:
         await call.answer("Отзывов на данный момент нет!")
+    except TelegramBadRequest:
+        await call.message.answer(f"Название проекта:<b> {data['name_project']}</b>\n"
+                                     f"Отзыв: {data['text']}\n"
+                                     f"Оставил: {data['name']}",
+                                     reply_markup=kb.menu_reviews(1, back_btn=False, user_id=call.from_user.id))
+        await call.message.delete()
+        set_statistic("view_reviews")
 
 
 @router.callback_query(Reviews.filter(F.action == "edit"))
-async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Reviews):
+async def viewing_reviews_next_back(call: CallbackQuery, callback_data: Reviews, state: FSMContext):
+    await state.clear()
     list_id = database.get_reviews_all_id()
-    num_record = callback_data.review_id + callback_data.value
+    num_record = callback_data.review_num + callback_data.value
     if num_record < 1:
         await call.answer("Вы достигли начала списка!")
     else:
@@ -44,7 +54,8 @@ async def callbacks_num_change_fab(call: CallbackQuery, callback_data: Reviews):
             await call.message.edit_text(f"Название проекта:<b> {data['name_project']}</b>\n"
                                          f"Отзыв: {data['text']}\n"
                                          f"Оставил: {data['name']}",
-                                         reply_markup=kb.menu_reviews(num_record, back_btn, next_btn))
+                                         reply_markup=kb.menu_reviews(num_record, user_id=call.from_user.id,
+                                                                      back_btn=back_btn, next_btn=next_btn))
             set_statistic("view_reviews")
         except IndexError:
             await call.answer("Отзывов больше нет!")

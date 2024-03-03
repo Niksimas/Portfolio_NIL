@@ -1,6 +1,6 @@
 from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
-from aiogram.filters.state import State, StatesGroup
+from aiogram.filters.state import State, StatesGroup, StateFilter
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 
 from core.handlers.basic import start_mess
@@ -18,13 +18,13 @@ class FormUnblocking(StatesGroup):
     CheckMessage = State()
 
 
-@subrouter.message(FormUnblocking.FIO, F.text == "Отмена")
+@subrouter.message(FormUnblocking.Phone, F.text == "Отмена")
 async def set_message(mess: Message, state: FSMContext):
     await mess.answer("Заполнение формы отменено!", reply_markup=ReplyKeyboardRemove())
     await start_mess(mess, state)
 
 
-@subrouter.callback_query(F.data == "no")
+@subrouter.callback_query(F.data == "no", FormUnblocking.CheckMessage)
 @subrouter.callback_query(F.data == "fill_form")
 async def start_notification(call: CallbackQuery, state: FSMContext):
     msg = await call.message.edit_text("Отправь мне ваше ФИО!",  reply_markup=kbi.cancel())
@@ -48,7 +48,10 @@ async def set_message(mess: Message, state: FSMContext, bot: Bot):
 
 @subrouter.message(FormUnblocking.Phone)
 async def set_photo_yes(mess: Message, state: FSMContext):
-    await state.update_data({"phone": mess.contact.phone_number})
+    try:
+        await state.update_data({"phone": mess.contact.phone_number})
+    except AttributeError:
+        await mess.answer("Я не смог определить номер телефона, пожалуйста, нажмите на кнопку")
     await state.set_state(FormUnblocking.CheckMessage)
     await mess.answer("Телефон сохранен!", reply_markup=ReplyKeyboardRemove())
     msg = await mess.answer("Укажите свой город", reply_markup=kbi.cancel())
@@ -70,9 +73,10 @@ async def save_photo_front(mess: Message, state: FSMContext, bot: Bot):
                       f"Телефон: {data['phone']}\n"
                       f"Город: {data['city']}\n\n"
                       f"Все верно?", reply_markup=kbi.confirmation())
+    await state.set_state(FormUnblocking.CheckMessage)
 
 
-@subrouter.callback_query(F.data == "yes")
+@subrouter.callback_query(FormUnblocking.CheckMessage, F.data == "yes")
 async def start_notification(call: CallbackQuery, state: FSMContext, bot: Bot):
     await call.message.edit_text("Спасибо за информацию, наш менеджер с вами свяжется!",
                                  reply_markup=kbi.finish_form())
