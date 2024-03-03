@@ -83,7 +83,8 @@ async def viewing_projects_next_back(call: CallbackQuery, callback_data: Project
 
 @router.callback_query(Project.filter(F.action == "like"))
 async def like(call: CallbackQuery, bot: Bot, callback_data: Project):
-    data = database.get_project_data(callback_data.id_proj, callback_data.types)
+    list_id = database.get_project_all_id(callback_data.types)
+    data = database.get_project_data(list_id[callback_data.num_proj], callback_data.types)
     await bot.send_message(get_chat_id(),
                            f"Пользователь:\n"
                            f"Имя: [{call.from_user.first_name}](tg://user?id={call.from_user.id})\n"

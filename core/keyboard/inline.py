@@ -49,7 +49,7 @@ def menu_projects(num_records: int, type_p: str,  user_id: int, id_proj: int,
         mess_next = "✖️✖️✖️"
     buttons = [
         [InlineKeyboardButton(text="❤️ Нравится",
-                              callback_data=Project(types=type_p, action="like", num_proj=num_records).pack())],
+                              callback_data=Project(types=type_p, action="like", num_proj=num_records,).pack())],
         [
             InlineKeyboardButton(text=mess_back,
                                  callback_data=Project(types=type_p, action="edit", num_proj=num_records, value=-1).pack()),
