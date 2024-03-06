@@ -8,8 +8,9 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from core.administrate import router_admin
 from core.handlers import main_router
+from core.reminder.general import scheduler
+from core.administrate import router_admin
 from core.settings import settings, get_chat_id
 
 home = os.path.dirname(__file__)

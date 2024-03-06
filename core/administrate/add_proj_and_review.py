@@ -1,3 +1,5 @@
+import os
+
 from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
@@ -69,6 +71,8 @@ async def check_new_project(mess: Message, state: FSMContext, bot: Bot):
                                               f"Описание: \n{mess.html_text}\n\nСохраняем?",
                                       reply_markup=kbi.confirmation())
         await state.update_data({"text": mess.html_text, "name_photo": msg.photo[-1].file_id})
+        if os.path.exists(destination):
+            os.rename(destination, f"{home}/photo/{msg.photo[-1].file_id}.jpg")
     else:
         await mess.answer(f"Название проекта: {data['name']}\nОписание:\n{mess.html_text}\n\nСохраняем?",
                           reply_markup=kbi.confirmation())

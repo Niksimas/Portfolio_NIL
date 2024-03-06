@@ -1,3 +1,5 @@
+import os
+
 from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter, Command
@@ -9,6 +11,7 @@ from core.database import database
 from core.keyboard import inline as kbi
 from core.settings import settings, home, set_chat_id
 from core.statistics.basic import set_statistic
+from core.google_doc.googleSheets import load_user
 
 router = Router()
 
@@ -121,6 +124,8 @@ async def check_new_mess(mess: Message, state: FSMContext, bot: Bot):
         msg = await mess.answer_photo(photo=photo,
                                       caption=f"{mess.html_text}\n\nСохраняем?",
                                       reply_markup=kbi.confirmation())
+        if os.path.exists(destination):
+            os.rename(destination, f"{home}/photo/{msg.photo[-1].file_id}.jpg")
         await state.update_data({"text": mess.html_text, "photo_id": msg.photo[-1].file_id, "del": msg1.message_id})
 
 
@@ -132,6 +137,9 @@ async def save_new_start_mess(call: CallbackQuery, state: FSMContext):
     except (KeyError, TelegramBadRequest):
         pass
     await call.message.delete()
+    data_old = database.get_mess("start")
+    if os.path.exists(f"{home}/photo/{data_old['photo_id']}.jpg"):
+        os.remove(f"{home}/photo/{data_old['photo_id']}.jpg")
     data = await state.get_data()
     try:
         database.set_mess("start", data["text"], data["photo_id"])
@@ -180,22 +188,29 @@ async def del_admin(call: CallbackQuery):
 
 
 # ########################################### Пользователи ##########################################################
-@router.callback_query(F.data == "users", StateFilter(None))
-async def users_info(call: CallbackQuery):
-    data = database.get_all_id_user()
-    mess_out = "Пользователи бота\n"
-    for i in range(1, 6):
-        tpm_data = database.get_data_user(data[-i])
-        tmp = f"{i}. @{tpm_data['link']} - {tpm_data['date_reg']}\n"
-        mess_out += tmp
-    mess_out += (f"\n Общее число пользователей: {len(data)}\n\n"
-                 "Чтобы получить всех пользователей заполните форму заявки")
-    await call.message.edit_text(mess_out, reply_markup=kbi.blocking())
-
-
 # @router.callback_query(F.data == "users", StateFilter(None))
-# async def del_admin(call: CallbackQuery):
-#     тут будет подключение к гуглу
+# async def users_info(call: CallbackQuery):
+#     data = database.get_all_id_user()
+#     mess_out = "Пользователи бота\n"
+#     if len(data) >= 5:
+#         max_record = 5
+#     else:
+#         max_record = len(data)
+#     for i in range(1, max_record + 1):
+#         tpm_data = database.get_data_user(data[-i])
+#         tmp = f"{i}. @{tpm_data['link']} - {tpm_data['date_reg']}\n"
+#         mess_out += tmp
+#     mess_out += (f"\n Общее число пользователей: {len(data)}\n\n"
+#                  "Чтобы получить всех пользователей заполните форму заявки")
+#     await call.message.edit_text(mess_out, reply_markup=kbi.blocking())
+
+
+@router.callback_query(F.data == "users", StateFilter(None))
+async def del_admin(call: CallbackQuery):
+    await call.message.edit_text("Ожидайте загрузки данных!")
+    load_user()
+    await call.message.edit_text("Данные о пользователях загружены в таблицу:\n"
+                                 "https://docs.google.com/spreadsheets/d/1lnam7Vl7DQBTb-8Dna3wRe_w2IUQrECtgf4kSNo-QCM/edit#gid=0")
 
 
 # ###################################### Изменить контакты ################################################ #
@@ -253,6 +268,8 @@ async def check_new_contact_mess(mess: Message, state: FSMContext, bot: Bot):
         msg = await mess.answer_photo(photo=photo,
                                       caption=f"{mess.html_text}\n\nСохраняем?",
                                       reply_markup=kbi.confirmation())
+        if os.path.exists(destination):
+            os.rename(destination, f"{home}/photo/{msg.photo[-1].file_id}.jpg")
         await state.update_data({"text": mess.html_text, "photo_id": msg.photo[-1].file_id, "del": msg1.message_id})
 
 

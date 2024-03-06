@@ -1,16 +1,18 @@
+import os
+
 from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message, FSInputFile
 
+from core.settings import home
 from core.database import database
 from core.keyboard import inline as kbi
+from core.handlers import basic as hand_base
 from core.keyboard.calldata import Project, Reviews
-from core.settings import settings, home, set_chat_id
 from core.handlers.view_projects import viewing_projects_next_back
 from core.handlers.view_reviews import viewing_reviews_next_back
-from core.handlers.basic import start_call
 
 subrouter = Router()
 
@@ -38,10 +40,13 @@ async def check_deleted_project(call: CallbackQuery, callback_data: Project):
 
 @subrouter.callback_query(Project.filter(F.action == "yes_del"))
 async def del_project(call: CallbackQuery, callback_data: Project, state: FSMContext):
+    data = database.get_project_data(callback_data.id_proj, callback_data.types)
+    if os.path.exists(f"{home}/photo/{data['name_photo']}.jpg"):
+        os.remove(f"{home}/photo/{data['name_photo']}.jpg")
     database.deleted_project(callback_data.id_proj)
     if callback_data.num_proj <= 1:
         await call.answer("Последний кейс удален!")
-        await start_call(call, state)
+        await hand_base.start_call(call, state)
     else:
         await call.answer("Кейс удален!")
         await viewing_projects_next_back(call, callback_data)
@@ -129,6 +134,9 @@ async def save_photo_project(mess: Message, state: FSMContext, bot: Bot):
 @subrouter.callback_query(Project.filter(F.action == "yes_mod"))
 async def save_modification_project(call: CallbackQuery, callback_data: Project, state: FSMContext):
     data = await state.get_data()
+    data_old = database.get_project_data(data["id_proj"], data["type"])
+    if os.path.exists(f"{home}/photo/{data_old['name_photo']}.jpg"):
+        os.remove(f"{home}/photo/{data_old['name_photo']}.jpg")
     database.update_project(data)
     await viewing_projects_next_back(call, callback_data, state)
 
@@ -186,7 +194,7 @@ async def del_review(call: CallbackQuery, callback_data: Reviews, state: FSMCont
     database.deleted_review(list_id[callback_data.review_num-1])
     if callback_data.review_num <= 1:
         await call.answer("Последний кейс удален!")
-        await start_call(call, state)
+        await hand_base.start_call(call, state)
     else:
         await call.answer("Кейс удален!")
         await viewing_reviews_next_back(call, callback_data)

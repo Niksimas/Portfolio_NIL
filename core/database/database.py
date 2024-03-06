@@ -55,6 +55,13 @@ def get_all_data_admin() -> dict:
     return result
 
 
+def get_all_data_user() -> list:
+    with sqlite3.connect(f"{home}/database/main_data.db") as connect:
+        cursor = connect.cursor()
+        cursor.execute('SELECT * FROM main.all_user')
+    return cursor.fetchall()
+
+
 def save_new_admin(user_id: int, link: str, name:str) -> None:
     save_new_user(user_id, link)
     with sqlite3.connect(f"{home}/database/main_data.db") as connect:
@@ -187,3 +194,12 @@ def update_review(data: dict) -> None:
         cursor.execute('UPDATE main.review SET name_project=$1, text=$2, name=$3 WHERE id=$4',
                        [data["name_project"], data['text'], data['name'], data['review_num']])
 
+
+def get_all_id_photo() -> list:
+    with sqlite3.connect(f"{home}/database/main_data.db") as connect:
+        cursor = connect.cursor()
+        cursor.execute(f'SELECT name_photo FROM main.project')
+        data_1 = cursor.fetchall()
+        cursor.execute(f'SELECT photo_id FROM main.message')
+        data_2 = cursor.fetchall()
+        return [i[0] for i in data_1] + [i[0] for i in data_2]
