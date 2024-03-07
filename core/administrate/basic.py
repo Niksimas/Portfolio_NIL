@@ -37,7 +37,7 @@ async def manual_new_chat_admin(call: CallbackQuery, state: FSMContext):
                                  "3. Добавить туда вашего бота\n"
                                  "4. Выдать боту права администратора\n"
                                  "5. Скопировать и отправить команду в новый чат /new_chat_admins",
-                                 reply_markup=kbi.admin_menu(call.from_user.id))
+                                 reply_markup=kbi.custom_btn("Назад", "admin"))
     await state.clear()
 
 
@@ -188,29 +188,13 @@ async def del_admin(call: CallbackQuery):
 
 
 # ########################################### Пользователи ##########################################################
-# @router.callback_query(F.data == "users", StateFilter(None))
-# async def users_info(call: CallbackQuery):
-#     data = database.get_all_id_user()
-#     mess_out = "Пользователи бота\n"
-#     if len(data) >= 5:
-#         max_record = 5
-#     else:
-#         max_record = len(data)
-#     for i in range(1, max_record + 1):
-#         tpm_data = database.get_data_user(data[-i])
-#         tmp = f"{i}. @{tpm_data['link']} - {tpm_data['date_reg']}\n"
-#         mess_out += tmp
-#     mess_out += (f"\n Общее число пользователей: {len(data)}\n\n"
-#                  "Чтобы получить всех пользователей заполните форму заявки")
-#     await call.message.edit_text(mess_out, reply_markup=kbi.blocking())
-
-
 @router.callback_query(F.data == "users", StateFilter(None))
 async def del_admin(call: CallbackQuery):
     await call.message.edit_text("Ожидайте загрузки данных!")
     load_user()
     await call.message.edit_text("Данные о пользователях загружены в таблицу:\n"
-                                 "https://docs.google.com/spreadsheets/d/1lnam7Vl7DQBTb-8Dna3wRe_w2IUQrECtgf4kSNo-QCM/edit#gid=0")
+                                 "https://docs.google.com/spreadsheets/d/1lnam7Vl7DQBTb-8Dna3wRe_w2IUQrECtgf4kSNo-QCM/edit#gid=0",
+                                 reply_markup=kbi.cancel_admin())
 
 
 # ###################################### Изменить контакты ################################################ #
