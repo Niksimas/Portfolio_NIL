@@ -49,7 +49,7 @@ async def del_project(call: CallbackQuery, callback_data: Project, state: FSMCon
         await hand_base.start_call(call, state)
     else:
         await call.answer("Кейс удален!")
-        await viewing_projects_next_back(call, callback_data)
+        await viewing_projects_next_back(call, callback_data, state)
 
 
 # ############################################### Изменение проекта ################################################## #
@@ -197,7 +197,7 @@ async def del_review(call: CallbackQuery, callback_data: Reviews, state: FSMCont
         await hand_base.start_call(call, state)
     else:
         await call.answer("Кейс удален!")
-        await viewing_reviews_next_back(call, callback_data)
+        await viewing_reviews_next_back(call, callback_data, state)
 
 
 # ############################################### Изменение отзыва ################################################## #
