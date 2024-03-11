@@ -51,8 +51,11 @@ async def contacts(call: CallbackQuery, bot: Bot):
     try:
         await call.message.edit_text(data_mess["text"], reply_markup=kb.site(site_mess["text"], site_mess["photo_id"]))
     except TelegramBadRequest:
-        await call.message.answer_photo(data_mess["photo_id"], caption=data_mess["text"],
-                                        reply_markup=kb.site(site_mess["text"], site_mess["photo_id"]))
+        if data_mess["photo_id"] is not None:
+            await call.message.answer(data_mess["text"], reply_markup=kb.site(site_mess["text"], site_mess["photo_id"]))
+        else:
+            await call.message.answer_photo(data_mess["photo_id"], caption=data_mess["text"],
+                                            reply_markup=kb.site(site_mess["text"], site_mess["photo_id"]))
         await call.message.delete()
     set_statistic("view_contact", call.from_user.id)
 
