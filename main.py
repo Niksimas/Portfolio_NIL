@@ -22,20 +22,20 @@ if not os.path.exists(f"{home}/core/statistics/data"):
 
 
 # Для отладки локально разкоментить
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 #
 # #Для отладки локально закоментить
-# logger = logging.getLogger()
-# logger.setLevel(logging.WARNING)
-# handler = logging.FileHandler(f"{home}/logging/{dt.date.today()}.log", "a+", encoding="utf-8")
-# handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
-# logger.addHandler(handler)
-#
-# logging.debug("Сообщения уровня DEBUG, необходимы при отладке ")
-# logging.info("Сообщения уровня INFO, полезная информация при работе программы")
-# logging.warning("Сообщения уровня WARNING, не критичны, но проблема может повторится")
-# logging.error("Сообщения уровня ERROR, программа не смогла выполнить какую-либо функцию")
-# logging.critical("Сообщения уровня CRITICAL, серьезная ошибка нарушающая дальнейшую работу")
+logger = logging.getLogger()
+logger.setLevel(logging.WARNING)
+handler = logging.FileHandler(f"{home}/logging/{dt.date.today()}.log", "a+", encoding="utf-8")
+handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+logger.addHandler(handler)
+
+logging.debug("Сообщения уровня DEBUG, необходимы при отладке ")
+logging.info("Сообщения уровня INFO, полезная информация при работе программы")
+logging.warning("Сообщения уровня WARNING, не критичны, но проблема может повторится")
+logging.error("Сообщения уровня ERROR, программа не смогла выполнить какую-либо функцию")
+logging.critical("Сообщения уровня CRITICAL, серьезная ошибка нарушающая дальнейшую работу")
 
 token = config("token")
 bot = Bot(token, parse_mode="HTML", disable_web_page_preview=True)
