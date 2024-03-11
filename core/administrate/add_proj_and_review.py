@@ -148,7 +148,7 @@ async def check_new_review(mess: Message, state: FSMContext, bot: Bot):
     await state.set_state(AddReview.CheckReview)
 
 
-@subrouter.message(AddReview.SetNameUser)
+@subrouter.callback_query(AddReview.CheckReview)
 async def save_new_review(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     id_review = database.save_new_review(data)

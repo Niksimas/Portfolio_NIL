@@ -39,7 +39,7 @@ async def set_text_review(mess: Message, state: FSMContext, bot: Bot):
     except (KeyError, TelegramBadRequest):
         pass
     await state.set_data({"name_project": mess.text})
-    msg = await mess.answer("Введите текст отзыва")
+    msg = await mess.answer("Введите текст отзыва", reply_markup=kb.cancel())
     await state.update_data({"del": msg.message_id})
     await state.set_state(CreatReview.Text)
 

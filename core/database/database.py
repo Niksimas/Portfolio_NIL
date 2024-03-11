@@ -192,7 +192,7 @@ def update_review(data: dict) -> None:
     with sqlite3.connect(f"{home}/database/main_data.db") as connect:
         cursor = connect.cursor()
         cursor.execute('UPDATE main.review SET name_project=$1, text=$2, name=$3 WHERE id=$4',
-                       [data["name_project"], data['text'], data['name'], data['review_num']])
+                       [data["name_project"], data['text'], data['name'], data['review_id']])
 
 
 def get_all_id_photo() -> list:

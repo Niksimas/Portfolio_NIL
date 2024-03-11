@@ -215,7 +215,7 @@ async def modify_menu_review(call: CallbackQuery, callback_data: Reviews, state:
                                  f"Оставил: {data['name']}\n\n"
                                  f"Что вы хотите изменить?",
                                  reply_markup=kbi.edit_review(callback_data))
-    await state.set_state(EditProject.CheckOldMess)
+    await state.set_state(EditReview.CheckOldMess)
     await state.update_data({"review_num": callback_data.review_num, "review_id": list_id[callback_data.review_num - 1]})
 
 
@@ -226,7 +226,7 @@ async def save_modification_review(call: CallbackQuery, callback_data: Reviews, 
     await viewing_reviews_next_back(call, callback_data, state)
 
 
-@subrouter.callback_query(F.data.in_(["name_project", "text", "name"]), EditProject.CheckOldMess)
+@subrouter.callback_query(F.data.in_(["name_project", "text", "name"]), EditReview.CheckOldMess)
 async def set_new_data_review(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     msg = await call.message.edit_text("Отправьте новые данные: ",
@@ -244,7 +244,7 @@ async def check_new_data_review(mess: Message, state: FSMContext, bot: Bot):
     except (KeyError, TelegramBadRequest):
         pass
     data = await state.get_data()
-    data_proj = database.get_review_data(data["review_num"])
+    data_proj = database.get_review_data(data["review_id"])
     data_proj[data['type_mess']] = mess.text
     await mess.answer(f"Название проекта:<b> {data_proj['name_project']}</b>\n"
                                  f"Отзыв: {data_proj['text']}\n"

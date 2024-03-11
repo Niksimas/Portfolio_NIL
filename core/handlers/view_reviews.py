@@ -17,12 +17,16 @@ async def viewing_reviews(call: CallbackQuery):
     if len(list_id) < 1:
         await call.answer("Отзывов пока что нет!")
         return
+    if 1 == len(list_id):
+        next_btn = False
+    else:
+        next_btn = True
     data = database.get_review_data(list_id[0])
     try:
         await call.message.edit_text(f"Название проекта:<b> {data['name_project']}</b>\n"
                                      f"Отзыв: {data['text']}\n"
                                      f"Оставил: {data['name']}",
-                                     reply_markup=kb.menu_reviews(1, back_btn=False, user_id=call.from_user.id))
+                                     reply_markup=kb.menu_reviews(1, back_btn=False, next_btn=next_btn, user_id=call.from_user.id))
         set_statistic("view_reviews", call.from_user.id)
     except KeyError:
         await call.answer("Отзывов на данный момент нет!")
@@ -30,7 +34,7 @@ async def viewing_reviews(call: CallbackQuery):
         await call.message.answer(f"Название проекта:<b> {data['name_project']}</b>\n"
                                      f"Отзыв: {data['text']}\n"
                                      f"Оставил: {data['name']}",
-                                     reply_markup=kb.menu_reviews(1, back_btn=False, user_id=call.from_user.id))
+                                     reply_markup=kb.menu_reviews(1, back_btn=False, next_btn=next_btn, user_id=call.from_user.id))
         await call.message.delete()
         set_statistic("view_reviews", call.from_user.id)
 
