@@ -14,6 +14,9 @@ router = Router()
 @router.callback_query(F.data == "see_review")
 async def viewing_reviews(call: CallbackQuery):
     list_id = database.get_reviews_all_id()
+    if len(list_id) < 1:
+        await call.answer("Отзывов пока что нет!")
+        return
     data = database.get_review_data(list_id[0])
     try:
         await call.message.edit_text(f"Название проекта:<b> {data['name_project']}</b>\n"
